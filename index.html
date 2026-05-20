@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>設計師不在的時候：用 Claude Design 一次對話拿到三個專業級網站方案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --text: #1a1a1a;
+    --text-2: #4a4a4a;
+    --text-mute: #888;
+    --bg: #fff;
+    --border: #e5e5e5;
+    --accent: #6c5ce7;
+    --accent-soft: #f0eeff;
+    --code-bg: #f6f6f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: 17px; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: 'Noto Sans TC', -apple-system, system-ui, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.85;
+  }
+
+  /* Header bar */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    position: sticky; top: 0; background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px); z-index: 10;
+  }
+  .site-header-inner {
+    max-width: 720px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .site-logo {
+    font-weight: 700; font-size: 15px; letter-spacing: -0.02em;
+    color: var(--text); text-decoration: none;
+  }
+  .site-nav { display: flex; gap: 24px; }
+  .site-nav a {
+    font-size: 13px; color: var(--text-mute); text-decoration: none;
+    font-weight: 500;
+  }
+
+  /* Article */
+  article { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .article-hero { padding: 64px 0 48px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
+  .article-meta {
+    font-size: 13px; color: var(--text-mute); margin-bottom: 16px;
+    display: flex; gap: 16px; align-items: center;
+  }
+  .article-tag {
+    background: var(--accent-soft); color: var(--accent);
+    padding: 2px 10px; border-radius: 4px; font-size: 12px; font-weight: 500;
+  }
+  h1 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 2.2rem; font-weight: 700; line-height: 1.3;
+    letter-spacing: -0.02em; margin-bottom: 12px;
+  }
+  .article-subtitle {
+    font-size: 1.1rem; color: var(--text-2); line-height: 1.6;
+  }
+
+  /* Body */
+  h2 {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.45rem; font-weight: 700; line-height: 1.35;
+    margin: 56px 0 20px; letter-spacing: -0.01em;
+    padding-top: 32px; border-top: 1px solid var(--border);
+  }
+  h2:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  h3 {
+    font-size: 1.1rem; font-weight: 700; margin: 36px 0 12px;
+  }
+  p { margin-bottom: 20px; }
+  p.lead { font-size: 1.05rem; color: var(--text-2); }
+
+  /* TL;DR box */
+  .tldr {
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    padding: 24px 28px; border-radius: 0 8px 8px 0; margin: 32px 0;
+  }
+  .tldr-title { font-weight: 700; font-size: 14px; color: var(--accent); margin-bottom: 12px; letter-spacing: 0.05em; }
+  .tldr ul { padding-left: 18px; }
+  .tldr li { margin-bottom: 8px; font-size: 0.95rem; }
+  .tldr li strong { color: var(--text); }
+
+  /* Lists */
+  ul, ol { padding-left: 24px; margin-bottom: 20px; }
+  li { margin-bottom: 8px; }
+
+  /* Blockquote */
+  blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 20px; margin: 28px 0;
+    color: var(--text-2); font-style: italic;
+  }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; margin: 28px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th {
+    text-align: left; padding: 10px 14px;
+    background: var(--code-bg); font-weight: 600;
+    border-bottom: 2px solid var(--border);
+  }
+  td {
+    padding: 10px 14px; border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  /* Code */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em; background: var(--code-bg);
+    padding: 2px 6px; border-radius: 4px;
+  }
+  pre {
+    background: var(--code-bg); padding: 20px 24px;
+    border-radius: 8px; overflow-x: auto; margin: 24px 0;
+    font-size: 0.85rem; line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; }
+
+  /* Links */
+  a { color: var(--accent); }
+  .article-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--code-bg); padding: 8px 16px; border-radius: 6px;
+    font-size: 0.9rem; text-decoration: none; color: var(--text);
+    margin-right: 8px; margin-bottom: 8px;
+  }
+  .article-link:hover { background: var(--accent-soft); }
+
+  /* Strong emphasis */
+  strong { font-weight: 700; }
+
+  /* Separator */
+  hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  /* Footer note */
+  .article-footer {
+    margin: 64px 0 80px;
+    padding-top: 32px; border-top: 1px solid var(--border);
+    font-size: 0.85rem; color: var(--text-mute);
+  }
+
+  /* Images */
+  .article-img {
+    margin: 32px 0; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .article-img img {
+    width: 100%; height: auto; display: block;
+  }
+  .article-img figcaption {
+    font-size: 0.8rem; color: var(--text-mute);
+    padding: 10px 16px; background: var(--code-bg);
+    text-align: center;
+  }
+  .compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin: 32px 0;
+  }
+  .compare-grid .article-img { margin: 0; }
+  .compare-grid .article-img img { max-height: 600px; object-fit: cover; object-position: top; }
+
+  /* Design breakdown */
+  .design-breakdown {
+    margin: 48px 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fafafa;
+  }
+  .design-breakdown-title {
+    padding: 20px 28px;
+    font-weight: 700; font-size: 0.85rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    background: var(--accent-soft);
+  }
+  .design-detail {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .design-detail:last-child { border-bottom: none; }
+  .design-detail:hover { background: #f0f0f0; }
+  .design-detail-img {
+    position: relative; overflow: hidden;
+    border-right: 1px solid var(--border);
+    background: #fff;
+  }
+  .design-detail-img img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top left;
+    display: block;
+  }
+  .design-detail-text {
+    padding: 28px 32px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .design-detail-label {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 8px;
+  }
+  .design-detail-heading {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.1rem; font-weight: 700;
+    margin-bottom: 10px; line-height: 1.4;
+  }
+  .design-detail-body {
+    font-size: 0.9rem; color: var(--text-2); line-height: 1.75;
+  }
+  .design-detail-body code {
+    font-size: 0.8em;
+  }
+  .design-detail.reverse {
+    direction: rtl;
+  }
+  .design-detail.reverse > * {
+    direction: ltr;
+  }
+  .design-detail.reverse .design-detail-img {
+    border-right: none; border-left: 1px solid var(--border);
+  }
+
+  /* Annotation markers on images */
+  .annotated-img {
+    position: relative; margin: 32px 0;
+    border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .annotated-img img { width: 100%; display: block; }
+  .annotation-dot {
+    position: absolute;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: default;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 2px 8px rgba(108,92,231,0.3); }
+    50% { box-shadow: 0 2px 16px rgba(108,92,231,0.6); }
+  }
+  .annotation-list {
+    background: var(--code-bg); padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .annotation-list ol {
+    padding-left: 20px; margin: 0;
+  }
+  .annotation-list li {
+    font-size: 0.85rem; color: var(--text-2);
+    margin-bottom: 6px; line-height: 1.6;
+  }
+  .annotation-list li strong { color: var(--accent); }
+
+  /* Pull quote */
+  .pull-quote {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.25rem; line-height: 1.6;
+    color: var(--text); text-align: center;
+    padding: 40px 32px; margin: 40px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="site-logo" href="#">Zeabur Blog</a>
+    <nav class="site-nav">
+      <a href="#">產品</a>
+      <a href="#">文件</a>
+      <a href="#">部落格</a>
+    </nav>
+  </div>
+</header>
+
+<article>
+
+<div class="article-hero">
+  <div class="article-meta">
+    <span class="article-tag">AI Design</span>
+    <span>2026 年 5 月</span>
+    <span>Tofus Wang</span>
+  </div>
+  <h1>設計師不在的時候：用 Claude Design 一次對話拿到三個專業級網站方案</h1>
+  <p class="article-subtitle">一家 38 年精密鑄造廠的官網翻新實錄——從研究同業、手刻第一版、到 AI 一次給出三個設計方向，中間只隔了一個晚上。</p>
+</div>
+
+<!-- ====== 第一幕：起 ====== -->
+
+<p>打開那個網站的時候，你會以為自己回到了 2012 年。</p>
+
+<p>XHTML 寫的、iframe 切的、table 排的版面。首頁左邊是一個永遠展開的樹狀選單，右邊是一張被壓縮到模糊的工廠大門照片。SSL 憑證過期，瀏覽器會跳警告。點進英文版，寫著「Under Construction」——這行字已經在那裡十三年了。</p>
+
+<figure class="article-img">
+  <img src="images/old-site.png" alt="雅信精密鑄造舊官網 — 2012 年的 XHTML + iframe 排版"/>
+  <figcaption>舊官網：XHTML + iframe + table 排版，25 週年獎盃是首頁主視覺，SSL 過期，手機打不開</figcaption>
+</figure>
+
+<p>這是一家 1987 年在新竹湖口創立的精密鑄造廠。做脫蠟鑄造，客戶遍及汽機車、國防、氣動工具、閥門，在產業裡有三十八年的實績。但如果你是一個第一次造訪官網的採購工程師，你看到的第一印象是：這家公司可能已經不在了。</p>
+
+<p>官網該改了。這件事所有人都知道。</p>
+
+<p>但找外包做一個企業官網報價十幾萬起跳，改完之後每次要更新內容還得再找人——或者學一套 CMS，但公司裡沒有人會維護。對一家三十人的製造業中小企業來說，這不是優先級最高的事。於是網站就一直停在那裡，一停就是十三年。</p>
+
+<!-- ====== 第一幕：承 ====== -->
+
+<h2>這不是個案：台灣中小企業的官網困境</h2>
+
+<p>台灣有超過 160 萬家中小企業，佔全體企業的 98% 以上。這些公司裡有多少的官網還停留在十年前的技術？沒有人做過精確統計，但你隨便搜尋任何一個傳統產業的供應商名單，點進去看他們的網站，答案不言自明。</p>
+
+<p>問題不只是技術老舊。問題是<strong>改的成本結構不對</strong>。一個外包專案的報價包含設計師出三版視覺、工程師切版、來回修改、上線部署——這些環節裡的每一個都需要專業人力，每一個都要錢。對年營收幾千萬的製造業來說，花十幾萬做一個「看起來比較新」的官網，投資報酬率算不過來。</p>
+
+<p>2026 年，AI 工具讓「寫 code」這件事的門檻幾乎消失了。Claude Code、Cursor、GitHub Copilot——你用自然語言描述你想要的東西，AI 幫你寫出來。一個不會寫程式的人，一個晚上就能做出一個能動的網站。</p>
+
+<p>但「能動」跟「好看」之間有一道鴻溝。</p>
+
+<p>你可以讓 AI 幫你寫出一個結構正確、功能完整的網頁。但配色怎麼選？字型怎麼配？佈局的視覺重量怎麼分配？Hero 區塊要放什麼？這些設計決策，AI 不會主動幫你做——除非你告訴它方向，而你得先知道方向在哪。</p>
+
+<p>寫得出來，不代表設計得好。</p>
+
+<div class="tldr">
+  <div class="tldr-title">TL;DR</div>
+  <ul>
+    <li><strong>案例</strong>：一家 38 年精密鑄造廠的官網翻新，從手刻到 AI 設計提案。</li>
+    <li><strong>發現</strong>：Claude Code 解決「寫」的問題，Claude Design 解決「設計方向」的問題——但最終的判斷還是人的。</li>
+    <li><strong>給誰看</strong>：想用 AI 做網站但不確定設計方向怎麼定的一人團隊、非設計師背景的 builder。</li>
+  </ul>
+</div>
+
+<!-- ====== 第二幕：轉之一 ====== -->
+
+<h2>先做功課：B2B 製造業網站有自己的設計語言</h2>
+
+<p>動手之前，先研究了十家國內外精密鑄造同業的網站。這個步驟不能跳過——B2B 製造業網站跟 SaaS landing page 是完全不同的邏輯。你的受眾不是消費者，是採購工程師；他們上你的網站只有一個目的：<strong>判斷你能不能做、品質可不可靠</strong>。</p>
+
+<p>歸納出的共同模式很一致：</p>
+
+<ul>
+  <li>首頁結構照著客戶的決策路徑排——Hero 建立第一印象，接著是製造能力和認證資質，然後是服務的產業別，最後收在報價入口</li>
+  <li>深色沉穩配色——深藍或深灰搭白底，再加一個強調色。華麗不是重點，信任感才是</li>
+  <li>大量真實照片——工廠實拍、設備實拍、產品實拍。stock photo 在 B2B 製造業的語境裡反而會降低信任感</li>
+  <li>導覽不超過六項，CTA 統一是「Request a Quote」</li>
+</ul>
+
+<p>台灣同業的共同問題則是技術債：table 排版、沒有響應式設計、沒有 SSL、SEO 幾乎為零。不是個案，是整個產業帶的現況。</p>
+
+<p>研究階段最重要的一個發現：做得好的不是最華麗的，而是讓工程師和採購三秒內找到答案的。這個原則決定了後面所有的設計方向。</p>
+
+<h2>第一版：用 Claude Code 一個晚上手刻上線</h2>
+
+<p>把舊網站三十幾個 HTML 檔全部爬下來之後發現，實際有價值的內容很少。公司沿革五個年份、品質承諾三句話、八類產品各一張照片、五台檢驗設備各一張照片、一張製程流程圖、聯絡資訊。這些東西一頁式就能全部放完——舊網站拆成三十幾頁純粹是 iframe 時代的技術限制。</p>
+
+<h3>配色：從品牌已經在用的東西裡提煉</h3>
+
+<p>配色沒有從零發明。這家公司的 logo 是紅藍黃三原色，但二十五週年紀念視覺用的是紫藍色調——品牌其實一直偏好紫色，只是沒有人把它系統化過。</p>
+
+<p>最後決定走紫加金黃。紫色在精密鑄造同業裡沒人用，辨識度天然就高。紫代表精緻和技術感，金代表金屬和品質感——語意上跟精密鑄造完全對得上。互補色，對比強但不吵。</p>
+
+<h3>技術：零依賴，一個檔案</h3>
+
+<p>用 Claude Code 直接寫純 HTML、CSS、vanilla JS。不用框架，不裝套件，整個網站就是一個 <code>index.html</code>。選擇零依賴不是技術偏好，是因為需求極簡——靜態內容、不需要後端、不需要狀態管理——加任何框架都是多餘的複雜度。</p>
+
+<p>頁面結構跟研究階段歸納的 B2B 模式一致：</p>
+
+<pre><code>Hero → 數據條 → 關於（時間軸 + 品質承諾）→ 產品 → 製程 → 設備 → CTA → 聯絡 → Footer</code></pre>
+
+<p>CSS 用 OKLCH 色彩空間定義整套色彩系統，搭配 <code>clamp()</code> 做流體排版。動畫用 Intersection Observer 做 scroll-reveal。部署在 GitHub Pages 上，當天就上線了。</p>
+
+<h3>踩到的坑</h3>
+
+<p><strong>GitHub Pages 的隱藏行為。</strong>GitHub Pages 預設跑 Jekyll 建置，Jekyll 會忽略底線開頭的檔案。從舊網站抓下來的照片有些是相機原始命名——<code>_MG_0062.jpg</code> 這種——部署後全部 404。解法很簡單：根目錄放一個 <code>.nojekyll</code> 空檔案。但你不知道這個機制的話，debug 會花不少時間。</p>
+
+<p><strong>素材品質的硬限制。</strong>舊網站的產品照是「一堆零件散落在白底上」的合照，放進現代的卡片式佈局裡格格不入。CSS 解決不了這個問題，最終還是需要重新拍攝。但先用現有素材上線再迭代，比等到完美素材到齊才動手實際得多。</p>
+
+<p><strong>表單不一定需要後端。</strong>精密鑄造的詢價不需要即時處理。一個 <code>mailto:</code> 連結預填好主旨和內容模板，客戶點了直接開 email app。比一個沒有後端支撐的假表單誠實。</p>
+
+<div class="design-breakdown">
+  <div class="design-breakdown-title">Design Breakdown — V1 Claude Code 手刻版</div>
+
+  <div class="design-detail">
+    <div class="design-detail-img">
+      <img src="images/v1-live.png" style="object-position: top center; max-height: 300px;" alt="V1 Hero"/>
+    </div>
+    <div class="design-detail-text">
+      <div class="design-detail-label">Hero</div>
+      <div class="design-detail-heading">一張真實的產品情境照決定了整個設計方向</div>
+      <div class="design-detail-body">木桌上擺著門把、閥門、縫紉機零件，背景是雅信的紙箱。用從左到右 + 從下到上的黑色漸層讓白色文字可讀，同時讓右邊的產品主體完整露出。這不是素材圖庫，是工廠自己拍的。</div>
+    </div>
+  </div>
+
+  <div class="design-detail reverse">
+    <div class="design-detail-text">
+      <div class="design-detail-label">配色</div>
+      <div class="design-detail-heading">紫 + 金黃：從品牌資產提煉，不是從零發明</div>
+      <div class="design-detail-body">紫色來自 25 週年紀念視覺，在精密鑄造同業裡沒人用，辨識度天然就高。金黃代表金屬和品質感。整套色彩用 OKLCH 色彩空間定義，確保在不同螢幕上的感知一致性。</div>
+    </div>
+    <div class="design-detail-img">
+      <img src="images/v1-live.png" style="object-position: top center; max-height: 300px; object-position: center 7%;" alt="V1 數據條"/>
+    </div>
+  </div>
+
+  <div class="design-detail">
+    <div class="design-detail-img">
+      <img src="images/v1-live.png" style="object-position: center 15%; max-height: 300px;" alt="V1 關於區塊"/>
+    </div>
+    <div class="design-detail-text">
+      <div class="design-detail-label">信任訊號</div>
+      <div class="design-detail-heading">38 年 · ISO 9001 · 8+ 產業 · 4 材料系列</div>
+      <div class="design-detail-body">B2B 採購最在意的四個數字，放在 Hero 正下方的數據條裡。不需要看完整個網站，首屏就回答了「你夠不夠格」這個問題。</div>
+    </div>
+  </div>
+
+  <div class="design-detail reverse">
+    <div class="design-detail-text">
+      <div class="design-detail-label">CTA</div>
+      <div class="design-detail-heading">沒有假表單，一個 mailto 就夠了</div>
+      <div class="design-detail-body">精密鑄造的詢價不需要即時處理。一個 <code>mailto:</code> 連結預填好主旨和內容模板，客戶點了直接開 email app——比一個沒有後端支撐的假表單誠實。</div>
+    </div>
+    <div class="design-detail-img">
+      <img src="images/v1-live.png" style="object-position: center 72%; max-height: 300px;" alt="V1 CTA"/>
+    </div>
+  </div>
+</div>
+
+<div style="margin: 32px 0;">
+  <a class="article-link" href="https://tofuswang.github.io/yea-shinn/" target="_blank">線上版 &rarr;</a>
+  <a class="article-link" href="https://github.com/Tofuswang/yea-shinn" target="_blank">GitHub 原始碼 &rarr;</a>
+</div>
+
+<!-- ====== 第二幕：轉之二（核心轉折）====== -->
+
+<h2>轉折：用 Claude Design 重新來過</h2>
+
+<p>第一版解決了「有沒有」的問題。但做完之後一個念頭揮之不去：如果有一個設計師看過這個案例，他會怎麼做？他會不會選完全不同的方向？</p>
+
+<p>Claude Design 是 Anthropic 推出的獨立設計工具——跟 Claude 聊天裡的 Artifacts 不同，它有持久的 canvas，可以反覆迭代累積設計資產，最後輸出一個完整的 handoff bundle 讓 coding agent 直接實作。</p>
+
+<p>做法很直接：把舊網站的網址、現有的照片素材、和第一版的程式碼一起丟給 Claude Design。讓它重新設計。</p>
+
+<figure class="article-img">
+  <img src="images/claude-design-canvas.png" alt="Claude Design 雅信鑄造專案畫面：左邊對話紀錄、中間設計預覽、右下 Tweaks Panel"/>
+  <figcaption>Claude Design 的工作介面——左邊是對話紀錄，中間是即時設計預覽，右下角的 Tweaks Panel 可以即時切換配色、字型和文案變體</figcaption>
+</figure>
+
+<p>它回來的東西超出預期。</p>
+
+<h3>三個設計方向，不是一個</h3>
+
+<p>Claude Design 沒有給一個固定的 mockup。它產出了<strong>三個完整的設計方向</strong>，每個方向都是可以在瀏覽器裡直接跑的 React prototype。</p>
+
+<p>以 Direction A「Clean Industrial」為例——白底、大量留白、大字型，走 Apple 式的極簡工業感。它從 logo 的紅藍黃三原色衍生出四組配色方案：品牌藍、鍛橘、深紅、石墨灰。每一組都包含主色、輔助色、背景色和文字色的完整定義。字型準備了三種組合。Hero 區塊有三種文案變體，針對不同的市場切入角度。</p>
+
+<p>每個方向都附帶一個 Tweaks Panel——點一下就能在配色之間切換，立刻看到整個頁面的視覺變化。換字型、換文案、開關模組，全部即時。</p>
+
+<div class="design-breakdown">
+  <div class="design-breakdown-title">Design Breakdown — Direction A「Clean Industrial」</div>
+
+  <div class="design-detail">
+    <div class="design-detail-img">
+      <img src="images/design-direction-a.png" style="object-position: top center; max-height: 300px;" alt="Direction A Hero"/>
+    </div>
+    <div class="design-detail-text">
+      <div class="design-detail-label">Hero</div>
+      <div class="design-detail-heading">「Send a drawing. We'll send back a casting.」</div>
+      <div class="design-detail-body">Claude Design 準備了三種 Hero 文案變體，針對不同市場切入角度：aerospace（強調精度）、supply chain（強調地緣優勢）、direct（強調行動）。每一種都可以透過 Tweaks Panel 即時切換預覽。</div>
+    </div>
+  </div>
+
+  <div class="design-detail reverse">
+    <div class="design-detail-text">
+      <div class="design-detail-label">配色系統</div>
+      <div class="design-detail-heading">從 logo 三原色衍生出四組方案</div>
+      <div class="design-detail-body">品牌藍、鍛橘、深紅、石墨灰——每一組都包含主色、輔助色、背景色和文字色的完整定義。透過 CSS 變數驅動，一鍵切換整個頁面的視覺調性。不是隨機配色，是從品牌既有的紅藍黃三原色有邏輯地推導出來的。</div>
+    </div>
+    <div class="design-detail-img">
+      <img src="images/design-direction-a.png" style="object-position: center 35%; max-height: 300px;" alt="Capabilities section"/>
+    </div>
+  </div>
+
+  <div class="design-detail">
+    <div class="design-detail-img">
+      <img src="images/design-direction-a.png" style="object-position: center 55%; max-height: 300px;" alt="Process section"/>
+    </div>
+    <div class="design-detail-text">
+      <div class="design-detail-label">資訊架構</div>
+      <div class="design-detail-heading">B2B 決策路徑：能力 → 材料 → 製程 → 報價</div>
+      <div class="design-detail-body">頁面結構不是隨意排列。它照著採購工程師的決策順序走：先看你能做什麼（capabilities），再看你用什麼材料（alloys），然後看製程怎麼跑（process），最後決定要不要詢價（RFQ）。每一層回答一個具體問題。</div>
+    </div>
+  </div>
+
+  <div class="design-detail reverse">
+    <div class="design-detail-text">
+      <div class="design-detail-label">字型選擇</div>
+      <div class="design-detail-heading">三種字型組合，三種不同的品牌調性</div>
+      <div class="design-detail-body">Inter Tight 給現代科技感、Sora 給幾何精密感、Source Serif 4 給編輯質感。Claude Design 不只選了一種字型——它準備了三種組合讓你試，因為字型對品牌調性的影響比大多數人想的大得多。</div>
+    </div>
+    <div class="design-detail-img">
+      <img src="images/design-direction-a.png" style="object-position: center 80%; max-height: 300px;" alt="CTA section"/>
+    </div>
+  </div>
+</div>
+
+<p>傳統流程裡，三個設計方向、每個方向四組配色、三種字型、三種文案變體——這是設計師幾週的工作量，加上幾輪 review 會議。</p>
+
+<p>在 Claude Design 裡，這是一次對話。</p>
+
+<h3>它還多做了你沒想到的東西</h3>
+
+<p>更有意思的是 Claude Design 額外產出了第一版沒涵蓋的頁面：產品詳情頁和 RFQ 報價表單。這些在 B2B 網站裡其實是核心功能——第一版因為時間限制跳過了，Claude Design 自己判斷這些應該要有。</p>
+
+<p>產出的 handoff bundle 結構是這樣的：</p>
+
+<pre><code>project/
+├── Yea Shinn Site A.html     &larr; 設計方向 A（進入點）
+├── src/
+│   ├── shared.jsx             &larr; 共用元件
+│   ├── direction-a.jsx        &larr; 方向 A（27KB）
+│   ├── direction-b.jsx        &larr; 方向 B
+│   ├── direction-c.jsx        &larr; 方向 C
+│   ├── product-page.jsx       &larr; 產品詳情頁
+│   ├── rfq-form.jsx           &larr; 報價表單
+│   └── logo-paths.js          &larr; SVG logo 路徑
+├── images/
+└── README.md                  &larr; 給 coding agent 的指示</code></pre>
+
+<p>README 裡明確告訴 Claude Code：讀主設計檔、順著 import 把所有元件讀一遍、理解整體結構後用適合的技術棧重新實作。Prototype 的 code 不是 production code——agent 的任務是匹配視覺產出，不是複製內部結構。</p>
+
+<!-- ====== 對比 ====== -->
+
+<h2>同一個案例，兩種工作模式</h2>
+
+<div class="compare-grid">
+  <figure class="article-img">
+    <img src="images/v1-live.png" alt="V1：Claude Code 手刻"/>
+    <figcaption>V1：Claude Code 手刻——紫金配色</figcaption>
+  </figure>
+  <figure class="article-img">
+    <img src="images/design-direction-a.png" alt="V2：Claude Design Direction A"/>
+    <figcaption>V2：Claude Design——品牌藍、Clean Industrial</figcaption>
+  </figure>
+</div>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th></th><th>V1：Claude Code 手刻</th><th>V2：Claude Design</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>投入時間</strong></td><td>一個晚上</td><td>一次對話</td></tr>
+    <tr><td><strong>設計決策</strong></td><td>自己研究同業後判斷</td><td>AI 提供三個方向，人來挑</td></tr>
+    <tr><td><strong>配色來源</strong></td><td>從品牌資產手動提煉</td><td>AI 從 logo 衍生四組方案</td></tr>
+    <tr><td><strong>技術產出</strong></td><td>純 HTML 單檔，可直接部署</td><td>React prototype，需轉換</td></tr>
+    <tr><td><strong>涵蓋範圍</strong></td><td>單頁首頁</td><td>首頁 + 產品頁 + 報價表單</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>V1 是「我知道我要什麼，AI 幫我寫」。你做完了研究、定好了方向、選好了配色——Claude Code 是你的打字員，效率最高。</p>
+
+<p>V2 是「我不確定最好的方向，AI 給我選項」。你還在探索階段，或者你想看看自己的判斷跟專業設計的提案差多少——Claude Design 一次給你三個方向和數十種排列組合，你的工作是挑。</p>
+
+<p>兩者不是互斥的。它們是設計流程裡不同階段的最佳工具。</p>
+
+<!-- ====== 第三幕：合 ====== -->
+
+<div class="pull-quote">
+做得好的不是最華麗的，而是讓工程師和採購<br/>三秒內找到「你能不能做、品質可不可靠」的答案。
+</div>
+
+<h2>工具到位了，瓶頸在哪？</h2>
+
+<p>寫 code 的門檻消失了，做設計稿的門檻也在消失。一個人、一個晚上、零設計背景，可以做出兩個版本的企業官網——一版手刻上線、一版拿到三個專業級設計方向等著挑。</p>
+
+<p>但整個過程裡真正花時間的不是寫 code，也不是等 AI 產出設計。是研究同業、是判斷配色、是決定「這張照片放 Hero 背景適不適合」、是在三個設計方向裡選出那一個。</p>
+
+<p>這些決策沒有 AI 會幫你做。AI 可以一次給你十個方向，但挑出對的那一個是你的工作。</p>
+
+<p>配色選紫加金黃，不是因為 AI 推薦，是因為看了品牌二十五年的視覺資產之後自己判斷的。頁面結構照 B2B 決策路徑排列，不是因為框架預設，是因為研究了十家同業之後歸納出來的。Claude Design 給的品牌藍方案其實也不錯——但要不要從紫色換成藍色，這個決定只有理解品牌脈絡的人能做。</p>
+
+<p>工具讓執行成本趨近於零。但判斷的門檻沒有變。</p>
+
+<h2>如果你也想試</h2>
+
+<ol>
+  <li><strong>先做功課</strong>——研究你的產業裡做得好的網站長什麼樣。別跳過這步。AI 可以幫你寫 code、幫你做設計稿，但它不會幫你理解你的受眾想看到什麼。</li>
+  <li><strong>先用 Claude Code 手刻一版</strong>——逼自己做配色、佈局、結構的設計決策。做的過程就是在建立判斷力。即使結果不完美，這些決策經驗是你之後評估 AI 提案時的基準。</li>
+  <li><strong>再用 Claude Design 挑戰自己的判斷</strong>——把你做完的東西丟給它，看它會提出什麼不同的方向。也許你會發現自己的選擇是對的；也許你會發現一個你沒想到的可能性。</li>
+</ol>
+
+<hr/>
+
+<p>那個 2012 年的官網還在線上。但旁邊已經有一個新版本跑在 GitHub Pages 上了，還有三個設計方向等著被挑。</p>
+
+<p>這件事還沒做完。但一個十三年沒動過的官網，不再需要等十幾萬的預算才能開始改。</p>
+
+<div class="article-footer">
+  <p>本文中的案例仍在進行中。待補素材：舊網站截圖（Before）、Claude Design 操作過程截圖、V1 vs V2 視覺對比圖。</p>
+</div>
+
+</article>
+
+</body>
+</html>
