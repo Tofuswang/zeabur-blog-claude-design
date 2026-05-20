@@ -4,6 +4,11 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>設計師不在的時候：用 Claude Design 一次對話拿到三個專業級網站方案</title>
+<meta name="description" content="用 Claude Design 幫傳統製造業翻新官網的實戰紀錄——從研究同業、Claude Code 手刻第一版到 AI 提案三個設計方向，一個人一個晚上完成。"/>
+<meta name="keywords" content="Claude Design, AI 網站設計, Claude Code, 一人團隊, 網站翻新, AI design tool"/>
+<meta property="og:title" content="設計師不在的時候：用 Claude Design 一次對話拿到三個專業級網站方案"/>
+<meta property="og:description" content="一家 38 年精密鑄造廠的官網翻新實錄——從 Claude Code 手刻到 Claude Design 提案的完整紀錄。"/>
+<meta property="og:type" content="article"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"/>
@@ -333,7 +338,7 @@
 
 <p>問題不只是技術老舊。問題是<strong>改的成本結構不對</strong>。一個外包專案的報價包含設計師出三版視覺、工程師切版、來回修改、上線部署——這些環節裡的每一個都需要專業人力，每一個都要錢。對年營收幾千萬的製造業來說，花十幾萬做一個「看起來比較新」的官網，投資報酬率算不過來。</p>
 
-<p>2026 年，AI 工具讓「寫 code」這件事的門檻幾乎消失了。Claude Code、Cursor、GitHub Copilot——你用自然語言描述你想要的東西，AI 幫你寫出來。一個不會寫程式的人，一個晚上就能做出一個能動的網站。</p>
+<p>2026 年，AI 工具讓「寫 code」這件事的門檻幾乎消失了。<a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank">Claude Code</a>、Cursor、GitHub Copilot——你用自然語言描述你想要的東西，AI 幫你寫出來。一個不會寫程式的人，一個晚上就能做出一個能動的網站。</p>
 
 <p>但「能動」跟「好看」之間有一道鴻溝。</p>
 
@@ -387,7 +392,7 @@
 
 <pre><code>Hero → 數據條 → 關於（時間軸 + 品質承諾）→ 產品 → 製程 → 設備 → CTA → 聯絡 → Footer</code></pre>
 
-<p>CSS 用 OKLCH 色彩空間定義整套色彩系統，搭配 <code>clamp()</code> 做流體排版。動畫用 Intersection Observer 做 scroll-reveal。部署在 GitHub Pages 上，當天就上線了。</p>
+<p>CSS 用 OKLCH 色彩空間定義整套色彩系統，搭配 <code>clamp()</code> 做流體排版。動畫用 Intersection Observer 做 scroll-reveal。部署在 <a href="https://docs.github.com/en/pages" target="_blank">GitHub Pages</a> 上，當天就上線了。當然，如果你想要更完整的部署體驗——自訂域名、HTTPS、部署日誌——也可以直接用 <a href="https://zeabur.com/docs/deploy/github" target="_blank">Zeabur 的 GitHub 整合</a>一鍵部署。</p>
 
 <h3>踩到的坑</h3>
 
@@ -456,7 +461,7 @@
 
 <p>第一版解決了「有沒有」的問題。但做完之後一個念頭揮之不去：如果有一個設計師看過這個案例，他會怎麼做？他會不會選完全不同的方向？</p>
 
-<p>Claude Design 是 Anthropic 推出的獨立設計工具——跟 Claude 聊天裡的 Artifacts 不同，它有持久的 canvas，可以反覆迭代累積設計資產，最後輸出一個完整的 handoff bundle 讓 coding agent 直接實作。</p>
+<p><a href="https://claude.ai/design" target="_blank">Claude Design</a> 是 Anthropic 推出的獨立設計工具——跟 Claude 聊天裡的 Artifacts 不同，它有持久的 canvas，可以反覆迭代累積設計資產，最後輸出一個完整的 handoff bundle 讓 coding agent 直接實作。</p>
 
 <p>做法很直接：把舊網站的網址、現有的照片素材、和第一版的程式碼一起丟給 Claude Design。讓它重新設計。</p>
 
@@ -616,8 +621,19 @@
 
 <p>這件事還沒做完。但一個十三年沒動過的官網，不再需要等十幾萬的預算才能開始改。</p>
 
+<div class="tldr" style="margin-top: 48px; border-left-color: #0a0a0a;">
+  <div class="tldr-title" style="color: #0a0a0a;">TRY IT</div>
+  <p style="font-size: 0.95rem; margin-bottom: 12px;">想用同樣的工作流試試看？Claude Code + Claude Design 處理設計和程式碼，<a href="https://zeabur.com" target="_blank">Zeabur</a> 處理部署和維運——從寫完到上線不需要懂伺服器。</p>
+  <p style="margin-bottom: 0;"><a href="https://zeabur.com/docs/get-started" target="_blank" style="background: #0a0a0a; color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 500; display: inline-block;">免費開始部署 →</a></p>
+</div>
+
 <div class="article-footer">
-  <p>本文中的案例仍在進行中。待補素材：舊網站截圖（Before）、Claude Design 操作過程截圖、V1 vs V2 視覺對比圖。</p>
+  <p><strong>延伸閱讀：</strong></p>
+  <ul style="padding-left: 18px;">
+    <li><a href="https://zeabur.com/docs/deploy/github" target="_blank">用 Zeabur 部署 GitHub 專案</a></li>
+    <li><a href="https://zeabur.com/templates" target="_blank">Zeabur 模板市場 — 一鍵部署 100+ 服務</a></li>
+    <li><a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank">Claude Code 官方文件</a></li>
+  </ul>
 </div>
 
 </article>
